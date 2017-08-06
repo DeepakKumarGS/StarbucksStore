@@ -19,8 +19,6 @@ knitr::opts_chunk$set(echo = TRUE)
 # Reading data into the dataframe,
 
 ```{r}
-setwd("C:/Users/Deepak kumar/Downloads/R/Starbucks Analysis")
-getwd()
 library(plotly)
 library(tidyr)
 library(ggplot2)
