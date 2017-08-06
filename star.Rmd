@@ -1,0 +1,117 @@
+---
+title: "Starbucks Analysis"
+author: "Deepak Kumar"
+date: "July 20, 2017"
+output: 
+      html_document:
+      fig_width: 10
+      fig_height: 5
+      toc : yes
+      number_sections: yes
+      code_folding: show 
+      
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Reading data into the dataframe,
+
+```{r}
+setwd("C:/Users/Deepak kumar/Downloads/R/Starbucks Analysis")
+getwd()
+library(plotly)
+library(tidyr)
+library(ggplot2)
+library(formattable)
+library(DT)
+library(lattice)
+library(maps)
+library(ggmap)
+library(tidyverse)
+star=read.csv("directory.csv",stringsAsFactors = FALSE,header=TRUE)
+```
+
+#Data Cleaning and Analysis:
+Let us analyse the data given and try to gather some intersting insights.
+
+```{r}
+glimpse(star)
+dim(star)
+```
+
+> Brand:
+
+The brand column contains 4 values - 
+
+* Starbucks- American Coffee House
+* Evolution Fresh - Subsidary of Starbucks .They are into cold pressed jiice and Smoothies.
+* Teavana - Acquired by Starbucks and carter to Loose leaf tea.
+* Coffee House Holding - Subsiary of Starbucks.
+
+## Let us now analyse each of the compaies presense country,city and statewise.
+
+```{r}
+temp=filter(star[star$Brand=="Coffee House Holdings",])
+dim(temp)
+datatable(temp)
+```
+
+It is seen that Starbucks operates Coffee House Holdings at one location -Seattle,US.
+
+```{r}
+temp=filter(star[star$Brand=="Teavana",])
+dim(temp)
+temp=temp %>% group_by(Country) %>% summarise(count=n())
+q=ggplot(temp,aes(x=factor(Country,levels=Country),y=count,fill=Country))+geom_bar(stat="identity")+theme(axis.title.x = element_text(angle=90))+labs(x="Country",y="Count")+ggtitle("Teavana Stores by Country")
+ggplotly(q)
+```
+
+##Evolution Fresh Stores:
+
+```{r}
+temp=filter(star[star$Brand=="Evolution Fresh",])
+dim(temp)
+datatable(temp)
+```
+Evolution fresh stores are located at 2 places in Seattle .Lets focus on Starbucks now.
+
+##Starbucks
+
+```{r}
+temp=filter(star[star$Brand=="Starbucks",])
+dim(temp)
+temp=na.omit(temp)
+count=temp %>% group_by(Country) %>% summarise(count=n(),percentage=(count/dim(temp)[1]) * 100) %>% arrange(desc(count))
+datatable(count)
+stat=temp %>% group_by(State.Province) %>% summarise(count=n(),percentage=(count/dim(temp)[1])*100) %>% arrange(desc(count))
+datatable(count)
+cit=temp %>% group_by(City) %>% summarise(count=n(),percentage=(count/dim(temp)[1])*100) %>% arrange(desc(count))
+datatable(cit)
+plot_ly(count,x=~count,y=~percentage,color=count$Country,mode="markers",name="Percentage wise store distribution",text=paste('Country:',count$Country)) %>% layout(title="Percentage wise store distribution",showlegend= FALSE)
+plot_ly(stat,x=~count,y=~percentage,color=stat$State.Province,mode="markers",name="Percentage wise store distribution",text=paste('State:',stat$State.Province))%>% layout(title="Percentage wise store distribution",showlegend= FALSE)
+plot_ly(cit,x=~count,y=~percentage,color=cit$City,type="scatter",mode="marker",name="Percentage wise store distribution",text=paste('City:',cit$City)) %>% layout(title="Percentage wise store distribution",showlegend= FALSE)
+```
+
+
+##Let us now analyse the type of ownership
+
+```{r}
+own=temp %>% group_by(Ownership.Type) %>% summarise(count=n(),percentage=(count/dim(temp)[1])*100)
+q=ggplot(own,aes(x=count,y=percentage,color=Ownership.Type))+geom_point()+ggtitle("Ownership Type")
+ggplotly(q)
+```
+
+
+#Indian Operations of Starbucks:
+
+```{r}
+Ind=filter(star[star$Country=="IN",])
+datatable(Ind)
+```
+
+The Indian Operation is an JV between Starbucks and TATA.
+
+
+Work in progress....
